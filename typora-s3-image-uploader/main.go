@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"mime"
 	"os"
 	"path/filepath"
 	"strings"
@@ -85,10 +86,16 @@ func main() {
 			os.Exit(1)
 		}
 
+		contentType := mime.TypeByExtension(filepath.Ext(file))
+		if contentType == "" {
+			contentType = "application/octet-stream"
+		}
+
 		_, err = client.PutObject(ctx, &s3.PutObjectInput{
-			Bucket: aws.String(*bucket),
-			Key:    aws.String(key),
-			Body:   f,
+			Bucket:      aws.String(*bucket),
+			Key:         aws.String(key),
+			Body:        f,
+			ContentType: aws.String(contentType),
 		})
 		f.Close()
 		if err != nil {
